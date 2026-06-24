@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "389679875262",
+    "project_id": "logival-gmml",
+    "storage_bucket": "logival-gmml.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389679875262:android:4799227b9013c9f53ccaef",
+        "android_client_info": {
+          "package_name": "com.cibertec.logivalgmml"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTIin7b3r_gw98J3HetLYrRU5zwDvKaCU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
