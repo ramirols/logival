@@ -56,4 +56,28 @@ class VehicleRepository(
         return doc.toObject(Vehicle::class.java)
     }
 
+    suspend fun getVehiclesForRequest(uid: String, role: String): Result<List<Vehicle>> = runCatching {
+        val normalizedRole = role.trim().uppercase().replace(" ", "_")
+
+        val snapshot = if (
+            normalizedRole == "COMERCIANTE" ||
+            normalizedRole == "CONTROL" ||
+            normalizedRole == "ADMIN" ||
+            normalizedRole == "ADMINISTRADOR"
+        ) {
+            db.collection("vehicles")
+                .get()
+                .awaitTask()
+        } else {
+            db.collection("vehicles")
+                .whereEqualTo("ownerUid", uid)
+                .get()
+                .awaitTask()
+        }
+
+        snapshot.documents
+            .mapNotNull { it.toObject(Vehicle::class.java) }
+            .sortedByDescending { it.createdAt }
+    }
+
 }

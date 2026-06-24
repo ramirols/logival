@@ -18,7 +18,9 @@ class RequestRepository(
         pavilionId: String,
         reason: String,
         productType: String,
-        estimatedWeight: String
+        estimatedWeight: String,
+        merchantUid: String = "",
+        merchantName: String = ""
     ): Result<String> = runCatching {
         require(uid.isNotBlank()) { "Sesión no válida." }
         require(vehicle.vehicleId.isNotBlank()) { "Selecciona un vehículo." }
@@ -30,6 +32,8 @@ class RequestRepository(
         val request = AccessRequest(
             requestId = ref.id,
             userId = uid,
+            merchantUid = merchantUid,
+            merchantName = merchantName,
             vehicleId = vehicle.vehicleId,
             vehiclePlate = vehicle.plate,
             pavilionId = pavilionId.trim(),
@@ -46,11 +50,48 @@ class RequestRepository(
     }
 
     suspend fun getRequests(uid: String, role: String): Result<List<AccessRequest>> = runCatching {
-        val snapshot = if (role.isControlRole()) {
-            db.collection("access_requests").get().awaitTask()
-        } else {
-            db.collection("access_requests").whereEqualTo("userId", uid).get().awaitTask()
+        val normalizedRole = role.trim().uppercase().replace(" ", "_")
+
+        if (
+            normalizedRole == "CONTROL" ||
+            normalizedRole == "ADMIN" ||
+            normalizedRole == "ADMINISTRADOR"
+        ) {
+            val snapshot = db.collection("access_requests")
+                .get()
+                .awaitTask()
+
+            return@runCatching snapshot.documents
+                .mapNotNull { it.toObject(AccessRequest::class.java) }
+                .sortedByDescending { it.requestedAt }
         }
+
+        if (normalizedRole == "COMERCIANTE") {
+            val ownSnapshot = db.collection("access_requests")
+                .whereEqualTo("userId", uid)
+                .get()
+                .awaitTask()
+
+            val associatedSnapshot = db.collection("access_requests")
+                .whereEqualTo("merchantUid", uid)
+                .get()
+                .awaitTask()
+
+            val ownRequests = ownSnapshot.documents
+                .mapNotNull { it.toObject(AccessRequest::class.java) }
+
+            val associatedRequests = associatedSnapshot.documents
+                .mapNotNull { it.toObject(AccessRequest::class.java) }
+
+            return@runCatching (ownRequests + associatedRequests)
+                .distinctBy { it.requestId }
+                .sortedByDescending { it.requestedAt }
+        }
+
+        val snapshot = db.collection("access_requests")
+            .whereEqualTo("userId", uid)
+            .get()
+            .awaitTask()
 
         snapshot.documents
             .mapNotNull { it.toObject(AccessRequest::class.java) }

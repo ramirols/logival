@@ -64,6 +64,17 @@ class AuthRepository(
         return document.toObject(AppUser::class.java)
     }
 
+    suspend fun getUsersByRole(role: String): Result<List<AppUser>> = runCatching {
+        val snapshot = db.collection("users")
+            .whereEqualTo("role", role)
+            .get()
+            .awaitTask()
+
+        snapshot.documents
+            .mapNotNull { it.toObject(AppUser::class.java) }
+            .sortedBy { it.name.lowercase() }
+    }
+
     fun logout() {
         auth.signOut()
     }

@@ -3,6 +3,10 @@ package com.cibertec.logivalgmml.models
 data class AccessRequest(
     val requestId: String = "",
     val userId: String = "",
+
+    val merchantUid: String = "",
+    val merchantName: String = "",
+
     val vehicleId: String = "",
     val vehiclePlate: String = "",
     val pavilionId: String = "",
