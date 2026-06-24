@@ -10,14 +10,23 @@ data class AppUser(
     val createdAt: Long = 0L
 )
 
+fun String.normalizedRole(): String {
+    return this.trim().uppercase().replace(" ", "_")
+}
 
+fun String.isAdminRole(): Boolean {
+    return this.normalizedRole() == UserRole.ADMIN
+}
 
 fun String.isControlRole(): Boolean {
-    return this == UserRole.CONTROL || this == UserRole.ADMIN
+    val role = this.normalizedRole()
+
+    return role == UserRole.CONTROL ||
+            role == UserRole.ADMIN
 }
 
 fun String.roleLabel(): String {
-    return when (this) {
+    return when (this.normalizedRole()) {
         UserRole.TRANSPORTISTA -> "Transportista"
         UserRole.COMERCIANTE -> "Comerciante"
         UserRole.CONTROL -> "Personal de control"
@@ -25,6 +34,3 @@ fun String.roleLabel(): String {
         else -> this
     }
 }
-
-
-
