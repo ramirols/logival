@@ -20,8 +20,6 @@ data class AccessRequest(
     val rejectedReason: String = ""
 )
 
-
-
 data class AccessLog(
     val logId: String = "",
     val requestId: String = "",
@@ -33,8 +31,6 @@ data class AccessLog(
     val calculatedFee: Double = 0.0,
     val status: String = ""
 )
-
-
 
 object RequestStatus {
     const val PENDIENTE = "PENDIENTE"

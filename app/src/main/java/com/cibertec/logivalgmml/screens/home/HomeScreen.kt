@@ -60,13 +60,14 @@ import com.cibertec.logivalgmml.ui.theme.LogiValGreenDark
 import com.cibertec.logivalgmml.ui.theme.LogiValRed
 import com.cibertec.logivalgmml.ui.theme.LogiValText
 import com.cibertec.logivalgmml.ui.theme.LogiValWhite
+import androidx.compose.foundation.BorderStroke
 
 private data class BottomTab(
     val title: String,
     val icon: ImageVector,
-    val type: MainTabType
+    val type: MainTabType,
+    val route: String? = null
 )
-
 private enum class MainTabType {
     INICIO,
     ESCANEAR,
@@ -93,35 +94,34 @@ fun HomeScreen(navController: NavController) {
         when {
             role.isAdminForHome() -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
-                BottomTab("Dashboard", Icons.Default.Dashboard, MainTabType.DASHBOARD),
-                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL),
+                BottomTab("Dashboard", Icons.Default.Dashboard, MainTabType.DASHBOARD, Routes.DASHBOARD),
+                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
                 BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
             )
 
             role.isControlForHome() -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
-                BottomTab("Escanear", Icons.Default.QrCodeScanner, MainTabType.ESCANEAR),
-                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL),
+                BottomTab("Escanear", Icons.Default.QrCodeScanner, MainTabType.ESCANEAR, Routes.QR_SCANNER),
+                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
                 BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
             )
 
             role.isTransportistaForHome() -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
-                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL),
-                BottomTab("Incidencias", Icons.Default.ReportProblem, MainTabType.INCIDENCIAS),
+                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
+                BottomTab("Incidencias", Icons.Default.ReportProblem, MainTabType.INCIDENCIAS, Routes.INCIDENT_LIST),
                 BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
             )
 
             role.isComercianteForHome() -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
-                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL),
-                BottomTab("Incidencias", Icons.Default.ReportProblem, MainTabType.INCIDENCIAS),
+                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
+                BottomTab("Incidencias", Icons.Default.ReportProblem, MainTabType.INCIDENCIAS, Routes.INCIDENT_LIST),
                 BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
             )
 
             else -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
-                BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL),
                 BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
             )
         }
@@ -141,7 +141,13 @@ fun HomeScreen(navController: NavController) {
                 tabs.forEachIndexed { index, tab ->
                     NavigationBarItem(
                         selected = selectedIndex == index,
-                        onClick = { selectedIndex = index },
+                        onClick = {
+                            if (tab.route != null) {
+                                navController.navigate(tab.route)
+                            } else {
+                                selectedIndex = index
+                            }
+                        },
                         icon = {
                             Icon(
                                 imageVector = tab.icon,
@@ -187,29 +193,17 @@ fun HomeScreen(navController: NavController) {
                     )
                 }
 
-                MainTabType.ESCANEAR -> {
-                    ScannerTabContent(navController = navController)
-                }
-
-                MainTabType.HISTORIAL -> {
-                    HistorialTabContent(
-                        role = role,
-                        navController = navController
-                    )
-                }
-
-                MainTabType.DASHBOARD -> {
-                    DashboardTabContent(navController = navController)
-                }
-
-                MainTabType.INCIDENCIAS -> {
-                    IncidenciasTabContent(navController = navController)
-                }
-
                 MainTabType.PERFIL -> {
                     PerfilTabContent(
                         user = user,
                         authRepository = authRepository,
+                        navController = navController
+                    )
+                }
+
+                else -> {
+                    InicioTabContent(
+                        user = user,
                         navController = navController
                     )
                 }
@@ -452,72 +446,6 @@ private fun DefaultHomeCards(navController: NavController) {
 }
 
 @Composable
-private fun ScannerTabContent(navController: NavController) {
-    SimpleTabLayout(
-        title = "Validar QR",
-        subtitle = "Registra ingreso y salida de vehículos desde el punto de control.",
-        buttonText = "Abrir escáner",
-        buttonColor = LogiValGreen
-    ) {
-        navController.navigate(Routes.QR_SCANNER)
-    }
-}
-
-@Composable
-private fun HistorialTabContent(
-    role: String,
-    navController: NavController
-) {
-    val title = when {
-        role.isControlForHome() -> "Historial operativo"
-        role.isAdminForHome() -> "Historial general"
-        role.isComercianteForHome() -> "Solicitudes asociadas"
-        else -> "Mis solicitudes"
-    }
-
-    val subtitle = when {
-        role.isControlForHome() -> "Consulta solicitudes pendientes, aprobadas, rechazadas y finalizadas."
-        role.isAdminForHome() -> "Revisa todas las solicitudes registradas en el sistema."
-        role.isComercianteForHome() -> "Consulta accesos vinculados a tus operaciones comerciales."
-        else -> "Consulta el estado de tus solicitudes y revisa tu QR cuando corresponda."
-    }
-
-    SimpleTabLayout(
-        title = title,
-        subtitle = subtitle,
-        buttonText = "Ver solicitudes",
-        buttonColor = LogiValGreen
-    ) {
-        navController.navigate(Routes.REQUEST_LIST)
-    }
-
-}
-
-@Composable
-private fun DashboardTabContent(navController: NavController) {
-    SimpleTabLayout(
-        title = "Dashboard administrativo",
-        subtitle = "Monitorea solicitudes, vehículos dentro, ingresos, salidas e incidencias.",
-        buttonText = "Abrir dashboard",
-        buttonColor = LogiValGreen
-    ) {
-        navController.navigate(Routes.DASHBOARD)
-    }
-}
-
-@Composable
-private fun IncidenciasTabContent(navController: NavController) {
-    SimpleTabLayout(
-        title = "Incidencias",
-        subtitle = "Reporta y consulta problemas operativos del mercado.",
-        buttonText = "Ver incidencias",
-        buttonColor = LogiValRed
-    ) {
-        navController.navigate(Routes.INCIDENT_LIST)
-    }
-}
-
-@Composable
 private fun PerfilTabContent(
     user: AppUser?,
     authRepository: AuthRepository,
@@ -607,60 +535,6 @@ private fun PerfilTabContent(
 }
 
 @Composable
-private fun SimpleTabLayout(
-    title: String,
-    subtitle: String,
-    buttonText: String,
-    buttonColor: Color,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = title,
-            color = LogiValGreenDark,
-            fontSize = 25.sp,
-            fontWeight = FontWeight.ExtraBold,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = subtitle,
-            color = LogiValText.copy(alpha = 0.70f),
-            fontSize = 15.sp,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = onClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp),
-            shape = RoundedCornerShape(18.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = buttonColor,
-                contentColor = LogiValWhite
-            )
-        ) {
-            Text(
-                text = buttonText,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-
-}
-
-@Composable
 private fun QuickCard(
     title: String,
     subtitle: String,
@@ -674,20 +548,29 @@ private fun QuickCard(
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = mainColor.copy(alpha = 0.08f)
+            containerColor = LogiValWhite
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        border = BorderStroke(
+            width = 1.dp,
+            color = mainColor.copy(alpha = 0.12f)
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            focusedElevation = 0.dp,
+            hoveredElevation = 0.dp
+        )
     ) {
         Row(
-            modifier = Modifier.padding(18.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(16.dp),
-                color = mainColor.copy(alpha = 0.12f)
+                color = mainColor.copy(alpha = 0.10f)
             ) {
                 Box(
                     contentAlignment = Alignment.Center
@@ -696,19 +579,21 @@ private fun QuickCard(
                         imageVector = icon,
                         contentDescription = null,
                         tint = mainColor,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(23.dp)
                     )
                 }
             }
 
             Spacer(modifier = Modifier.size(14.dp))
 
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = title,
                     fontWeight = FontWeight.ExtraBold,
                     color = titleColor,
-                    fontSize = 16.sp
+                    fontSize = 15.sp
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -716,12 +601,11 @@ private fun QuickCard(
                 Text(
                     text = subtitle,
                     color = LogiValText.copy(alpha = 0.68f),
-                    fontSize = 14.sp
+                    fontSize = 13.sp
                 )
             }
         }
     }
-
 }
 
 private fun String.normalizedRoleForHome(): String {
