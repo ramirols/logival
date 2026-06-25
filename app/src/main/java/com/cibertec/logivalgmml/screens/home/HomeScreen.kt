@@ -96,33 +96,33 @@ fun HomeScreen(navController: NavController) {
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
                 BottomTab("Dashboard", Icons.Default.Dashboard, MainTabType.DASHBOARD, Routes.DASHBOARD),
                 BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
-                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
+                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL, Routes.PROFILE)
             )
 
             role.isControlForHome() -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
                 BottomTab("Escanear", Icons.Default.QrCodeScanner, MainTabType.ESCANEAR, Routes.QR_SCANNER),
                 BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
-                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
+                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL, Routes.PROFILE)
             )
 
             role.isTransportistaForHome() -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
                 BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
                 BottomTab("Incidencias", Icons.Default.ReportProblem, MainTabType.INCIDENCIAS, Routes.INCIDENT_LIST),
-                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
+                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL, Routes.PROFILE)
             )
 
             role.isComercianteForHome() -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
                 BottomTab("Historial", Icons.Default.History, MainTabType.HISTORIAL, Routes.REQUEST_LIST),
                 BottomTab("Incidencias", Icons.Default.ReportProblem, MainTabType.INCIDENCIAS, Routes.INCIDENT_LIST),
-                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
+                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL, Routes.PROFILE)
             )
 
             else -> listOf(
                 BottomTab("Inicio", Icons.Default.Home, MainTabType.INICIO),
-                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL)
+                BottomTab("Perfil", Icons.Default.Person, MainTabType.PERFIL, Routes.PROFILE)
             )
         }
     }
